@@ -1,9 +1,9 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://tu-dominio.com',
-  compressHTML: true,
+  site: 'https://nicorame.github.io',
+  base: '/f1-calendar', // Nombre de tu repositorio
   build: {
-    inlineStylesheets: 'auto'
+    assets: '_astro'
   }
 });
