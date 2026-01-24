@@ -92,7 +92,7 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
           </div>
 
           <div class="cta-container">
-            <a href="/f1nextrace/calendario" class="cta-button">
+            <a href="./calendario" class="cta-button">
               Ver calendario completo
               <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"/>
@@ -129,11 +129,10 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       justify-content: center;
       gap: 0.5rem;
       font-size: 2.5rem;
-      font-weight: 400;
+      font-weight: 900;
       margin-bottom: 0.5rem;
-      font-family: 'Turbo', sans-serif;
+      font-family: 'Bebas Neue', sans-serif;
       letter-spacing: 0.05em;
-      font-style: italic;
     }
 
     .logo-f1 {
@@ -170,17 +169,16 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
 
     .race-location {
       font-size: 4.5rem;
-      font-weight: 400;
+      font-weight: 900;
       background: var(--gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 3rem;
       line-height: 1.1;
-      font-family: 'Turbo', sans-serif;
+      font-family: 'Bebas Neue', sans-serif;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      font-style: italic;
     }
 
     .countdown {
@@ -201,13 +199,12 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
 
     .countdown-value {
       font-size: 5rem;
-      font-weight: 400;
+      font-weight: 900;
       line-height: 1;
       font-variant-numeric: tabular-nums;
       color: var(--text-primary);
-      font-family: 'Turbo', sans-serif;
+      font-family: 'Bebas Neue', sans-serif;
       letter-spacing: 0.05em;
-      font-style: italic;
     }
 
     .countdown-label {
@@ -240,19 +237,16 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       padding: 0.75rem 2rem;
       border-radius: 1rem;
       font-size: 1.125rem;
-      font-weight: 800;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
     .session-time {
       font-size: 1.5rem;
-      font-weight: 400;
+      font-weight: 700;
       color: var(--text-primary);
       font-variant-numeric: tabular-nums;
-      font-family: 'Turbo', sans-serif;
-      letter-spacing: 0.05em;
-      font-style: italic;
+      font-family: 'Bebas Neue', sans-serif;
     }
 
     .show-schedule-btn {
@@ -320,12 +314,11 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
 
     .schedule-title {
       font-size: 1.5rem;
-      font-weight: 400;
+      font-weight: 700;
       color: var(--text-primary);
       margin: 0;
-      font-family: 'Turbo', sans-serif;
+      font-family: 'Bebas Neue', sans-serif;
       letter-spacing: 0.05em;
-      font-style: italic;
     }
 
     .schedule-grid {
@@ -455,7 +448,6 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
 
       .countdown-separator {
         font-size: 2rem;
-        margin: 0 0.25rem;
       }
     }
   </style>
@@ -490,11 +482,9 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
     }
 
-    // Initialize countdown
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Scroll to schedule section
     document.addEventListener('DOMContentLoaded', function() {
       const toggleBtn = document.getElementById('toggleSchedule');
       const scheduleSection = document.getElementById('scheduleSection');

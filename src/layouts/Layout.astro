@@ -25,34 +25,25 @@ const { title, description } = Astro.props;
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content="/f1nextrace.png" />
+    <meta property="og:image" content="/favicon.png" />
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="/f1nextrace.png" />
+    <meta name="twitter:image" content="/favicon.png" />
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/f1nextrace.png" />
-    <link rel="apple-touch-icon" href="/f1nextrace.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="512x512" href="public/favicon.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="public/favicon.png" />
     
     <title>{title}</title>
     
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    
-    <style>
-      @font-face {
-        font-family: 'Turbo';
-        src: url('https://cdn.jsdelivr.net/gh/fontsource/fontsource/fonts/turbo@latest/files/turbo-latin-400-normal.woff2') format('woff2');
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@900&display=swap" rel="stylesheet" />
     
     <style is:global>
       * {
@@ -69,12 +60,15 @@ const { title, description } = Astro.props;
         --text-secondary: #a3a3a3;
         --accent: #e10600;
         --accent-hover: #ff1e00;
+        --sprint: #a855f7;
+        --sprint-hover: #c084fc;
         --border: #2a2a2a;
         --gradient: linear-gradient(135deg, #e10600 0%, #ff4400 100%);
+        --gradient-sprint: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
       }
 
       body {
-        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: var(--bg-primary);
         color: var(--text-primary);
         min-height: 100vh;
