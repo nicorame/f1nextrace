@@ -1,0 +1,505 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import { getNextSession, getWeekendSessions, parseDate } from '../utils/raceData';
+
+const nextSession = getNextSession();
+const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
+---
+
+<Layout 
+  title="F1 Horarios - Próxima Carrera y Calendario Completo 2026"
+  description="Cuenta regresiva para la próxima sesión de Fórmula 1. Horarios actualizados de todas las carreras, entrenamientos y clasificaciones del campeonato 2026."
+>
+  <main class="main-container">
+    <div class="hero-section">
+      <header class="header">
+        <h1 class="logo">
+          <span class="logo-f1">F1</span>
+          <span class="logo-text">Horarios</span>
+        </h1>
+        <p class="subtitle">Campeonato 2026</p>
+      </header>
+
+      {nextSession ? (
+        <div class="countdown-section">
+          <p class="next-race-label">próxima carrera</p>
+          
+          <h2 class="race-location">{nextSession.gp}</h2>
+
+          <div id="countdown" class="countdown" data-target-date={parseDate(nextSession.fecha, nextSession.hora).toISOString()}>
+            <div class="countdown-item">
+              <span class="countdown-value" id="days">00</span>
+              <span class="countdown-label">días</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-item">
+              <span class="countdown-value" id="hours">00</span>
+              <span class="countdown-label">horas</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-item">
+              <span class="countdown-value" id="minutes">00</span>
+              <span class="countdown-label">minutos</span>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-item">
+              <span class="countdown-value" id="seconds">00</span>
+              <span class="countdown-label">segundos</span>
+            </div>
+          </div>
+
+          <div class="session-info-main">
+            <div class="session-badge">{nextSession.sesion}</div>
+            <div class="session-time">
+              <span>{nextSession.hora} hs</span>
+            </div>
+          </div>
+
+          <button id="toggleSchedule" class="show-schedule-btn">
+            ver todos los horarios
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <div class="no-race">
+          <p>No hay carreras programadas próximamente</p>
+        </div>
+      )}
+    </div>
+
+    {nextSession && (
+      <div id="scheduleSection" class="schedule-section">
+        <div class="container">
+          <div class="schedule-header">
+            <h3 class="schedule-title">Horarios del fin de semana</h3>
+          </div>
+
+          <div class="weekend-schedule">
+            <div class="schedule-grid">
+              {weekendSessions.map(session => (
+                <div class="schedule-item">
+                  <div class="schedule-session">{session.sesion}</div>
+                  <div class="schedule-details">
+                    <span class="schedule-date">{session.fecha.substring(0, 5)}</span>
+                    <span class="schedule-time">{session.hora} hs</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="cta-container">
+            <a href="/calendario" class="cta-button">
+              Ver calendario completo
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
+  </main>
+
+  <style>
+    .main-container {
+      min-height: 100vh;
+    }
+
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-f1 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-text {
+      color: var(--text-primary);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .countdown-section {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .next-race-label {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: lowercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+    }
+
+    .race-location {
+      font-size: 4.5rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 3rem;
+      line-height: 1.1;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    .countdown {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 3rem 0;
+      flex-wrap: wrap;
+    }
+
+    .countdown-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .countdown-value {
+      font-size: 5rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.04em;
+    }
+
+    .countdown-label {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: lowercase;
+      letter-spacing: 0.1em;
+    }
+
+    .countdown-separator {
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0 0.5rem;
+    }
+
+    .session-info-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      margin: 3rem 0;
+      flex-wrap: wrap;
+    }
+
+    .session-badge {
+      background: var(--accent);
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 1rem;
+      font-size: 1.125rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .session-time {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .show-schedule-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+      text-transform: lowercase;
+    }
+
+    .show-schedule-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .chevron-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: transform 0.3s ease;
+    }
+
+    .show-schedule-btn.active .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    .schedule-section {
+      min-height: 100vh;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .schedule-section .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .schedule-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .weekend-schedule {
+      margin-bottom: 3rem;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .schedule-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .schedule-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .schedule-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .schedule-session {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .schedule-details {
+      display: flex;
+      gap: 0.75rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .schedule-time {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--gradient);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(225, 6, 0, 0.4);
+    }
+
+    .cta-container {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .button-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .no-race {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .race-location {
+        font-size: 3rem;
+      }
+
+      .countdown-value {
+        font-size: 3.5rem;
+      }
+
+      .countdown-separator {
+        font-size: 3rem;
+      }
+
+      .countdown-label {
+        font-size: 0.875rem;
+      }
+
+      .session-badge {
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+      }
+
+      .session-time {
+        font-size: 1.25rem;
+      }
+
+      .schedule-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .race-location {
+        font-size: 2.5rem;
+      }
+
+      .countdown {
+        gap: 0.75rem;
+      }
+
+      .countdown-value {
+        font-size: 2.5rem;
+      }
+
+      .countdown-separator {
+        font-size: 2rem;
+        margin: 0 0.25rem;
+      }
+    }
+  </style>
+
+  <script>
+    function updateCountdown() {
+      const countdownEl = document.getElementById('countdown');
+      if (!countdownEl) return;
+
+      const targetDate = new Date(countdownEl.dataset.targetDate);
+      const now = new Date();
+      const diff = targetDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        location.reload();
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const daysEl = document.getElementById('days');
+      const hoursEl = document.getElementById('hours');
+      const minutesEl = document.getElementById('minutes');
+      const secondsEl = document.getElementById('seconds');
+
+      if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    // Initialize countdown
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Scroll to schedule section
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('toggleSchedule');
+      const scheduleSection = document.getElementById('scheduleSection');
+      
+      if (toggleBtn && scheduleSection) {
+        toggleBtn.addEventListener('click', function() {
+          toggleBtn.classList.toggle('active');
+          scheduleSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+    });
+  </script>
+</Layout>

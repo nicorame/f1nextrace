@@ -1,0 +1,322 @@
+---
+// src/pages/calendario.astro
+import Layout from '../layouts/Layout.astro';
+import { groupByGP } from '../utils/raceData';
+
+const groupedRaces = groupByGP();
+---
+
+<Layout 
+  title="Calendario Completo F1 2026 - Todos los Horarios"
+  description="Calendario completo de la temporada 2026 de Fórmula 1. Horarios de todas las carreras, entrenamientos libres, clasificaciones y sprints del campeonato."
+>
+  <main class="calendar-page">
+    <div class="container">
+      <header class="page-header">
+        <a href="/" class="back-button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Volver
+        </a>
+        
+        <div class="header-content">
+          <h1 class="page-title">
+            <span class="title-accent">Calendario</span> F1 2026
+          </h1>
+          <p class="page-description">Todos los horarios del campeonato (Argentina)</p>
+        </div>
+      </header>
+
+      <div class="races-grid">
+        {Array.from(groupedRaces.entries()).map(([gp, sessions]) => {
+          const carrera = sessions.find(s => s.sesion === "Carrera");
+          const fecha = carrera ? carrera.fecha : sessions[0].fecha;
+          const hasSprint = sessions.some(s => s.sesion === "Sprint");
+          
+          return (
+            <article class={`race-card ${hasSprint ? 'race-card-sprint' : ''}`}>
+              <div class="race-header">
+                <div class="race-badges">
+                  <div class="race-round">GP</div>
+                  {hasSprint && <div class="sprint-badge">SPRINT</div>}
+                </div>
+                <h2 class="race-name">{gp}</h2>
+                <p class="race-date">{fecha}</p>
+              </div>
+              
+              <div class="sessions-list">
+                {sessions.map(session => {
+                  const isRace = session.sesion === "Carrera";
+                  const isSprint = session.sesion === "Sprint";
+                  return (
+                    <div class={`session-item ${isRace ? 'session-race' : ''} ${isSprint ? 'session-sprint' : ''}`}>
+                      <span class="session-name">{session.sesion}</span>
+                      <div class="session-info">
+                        <span class="session-date">{session.fecha.substring(0, 5)}</span>
+                        <span class="session-time">{session.hora}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <footer class="page-footer">
+        <p>Todos los horarios en hora de Argentina (GMT-3)</p>
+        <p class="footer-note">Los horarios pueden estar sujetos a cambios por parte de la FIA</p>
+      </footer>
+    </div>
+  </main>
+
+  <style>
+    .calendar-page {
+      min-height: 100vh;
+      padding: 2rem 0 4rem;
+    }
+
+    .page-header {
+      margin-bottom: 3rem;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .back-button svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .header-content {
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .title-accent {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-description {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+    }
+
+    .races-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .race-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .race-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(225, 6, 0, 0.2);
+    }
+
+    .race-card-sprint {
+      border-color: var(--sprint);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(192, 132, 252, 0.05) 100%);
+    }
+
+    .race-card-sprint:hover {
+      border-color: var(--sprint-hover);
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+    }
+
+    .race-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .race-badges {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .race-round {
+      display: inline-block;
+      background: var(--bg-secondary);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sprint-badge {
+      display: inline-block;
+      background: var(--sprint);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .race-name {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .race-date {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .sessions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .session-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .session-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .session-race {
+      background: linear-gradient(135deg, rgba(225, 6, 0, 0.1) 0%, rgba(255, 68, 0, 0.1) 100%);
+      border-color: var(--accent);
+    }
+
+    .session-race .session-name {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .session-sprint {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(192, 132, 252, 0.1) 100%);
+      border-color: var(--sprint);
+    }
+
+    .session-sprint .session-name {
+      color: var(--sprint);
+      font-weight: 700;
+    }
+
+    .session-sprint .session-time {
+      color: var(--sprint);
+    }
+
+    .session-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .session-info {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .session-date {
+      color: var(--text-secondary);
+    }
+
+    .session-time {
+      color: var(--accent);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .page-footer {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-note {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .races-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .race-card {
+        padding: 1.25rem;
+      }
+
+      .race-name {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .session-info {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-end;
+      }
+    }
+  </style>
+</Layout>
