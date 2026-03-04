@@ -1,0 +1,422 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Campeonato F1 2026 - Clasificación de Pilotos"
+  description="Clasificación actualizada del campeonato de pilotos de Fórmula 1 2026. Posiciones y puntos de todos los pilotos del campeonato."
+>
+  <main class="champ-page">
+    <div class="container">
+      <header class="champ-header">
+        <a href="/f1nextrace/" class="champ-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Volver
+        </a>
+        <div class="champ-header-content">
+          <h1 class="champ-title">
+            <span class="champ-title-accent">Campeonato</span> F1 2026
+          </h1>
+          <p class="champ-subtitle">Clasificación de pilotos</p>
+        </div>
+      </header>
+
+      <div id="standings-container">
+        <div class="champ-loading">
+          <div class="champ-spinner"></div>
+          <p>Cargando clasificación...</p>
+        </div>
+      </div>
+
+      <footer class="champ-footer">
+        <p>Datos provistos por <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a></p>
+        <p class="champ-footer-note">Actualizado después de cada carrera</p>
+      </footer>
+    </div>
+  </main>
+
+  <style is:global>
+    .champ-page {
+      min-height: 100vh;
+      padding: 2rem 0 4rem;
+    }
+
+    .champ-header {
+      margin-bottom: 3rem;
+    }
+
+    .champ-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .champ-back:hover {
+      color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .champ-back svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .champ-header-content {
+      text-align: center;
+    }
+
+    .champ-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .champ-title-accent {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .champ-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+    }
+
+    /* Loading */
+    .champ-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 5rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .champ-spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: champ-spin 0.8s linear infinite;
+    }
+
+    @keyframes champ-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .champ-error,
+    .champ-empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+      line-height: 2;
+    }
+
+    /* Standings list */
+    .champ-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Each driver row */
+    .champ-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--team-color, var(--border));
+      border-radius: 1rem;
+      padding: 0.875rem 1.25rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .champ-row:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      border-color: var(--team-color, var(--accent));
+    }
+
+    /* Position badge */
+    .champ-pos {
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      font-weight: 900;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    .champ-pos-1 {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #000;
+    }
+
+    .champ-pos-2 {
+      background: linear-gradient(135deg, #D0D0D0, #A0A0A0);
+      color: #000;
+    }
+
+    .champ-pos-3 {
+      background: linear-gradient(135deg, #CD7F32, #8B5220);
+      color: #fff;
+    }
+
+    /* Driver photo */
+    .champ-photo {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border: 2px solid var(--team-color, var(--border));
+    }
+
+    .champ-photo-placeholder {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--team-color, var(--border));
+      flex-shrink: 0;
+    }
+
+    /* Driver info */
+    .champ-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .champ-code {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.12em;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .champ-name {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .champ-team {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--team-color, var(--text-secondary));
+      margin-top: 0.15rem;
+    }
+
+    .champ-team-dot {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background-color: var(--team-color, var(--text-secondary));
+      flex-shrink: 0;
+    }
+
+    /* Points */
+    .champ-pts {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .champ-pts-value {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 900;
+      font-family: 'Bebas Neue', sans-serif;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .champ-pts-label {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Footer */
+    .champ-footer {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      padding-top: 2.5rem;
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .champ-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .champ-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .champ-footer-note {
+      margin-top: 0.4rem;
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .champ-title {
+        font-size: 2rem;
+      }
+
+      .champ-photo,
+      .champ-photo-placeholder {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+
+      .champ-pts-value {
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .champ-row {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .champ-photo,
+      .champ-photo-placeholder {
+        display: none;
+      }
+
+      .champ-code {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+
+  <script>
+    async function loadStandings() {
+      const container = document.getElementById('standings-container');
+      if (!container) return;
+
+      try {
+        const [champRes, driversRes] = await Promise.all([
+          fetch('https://api.openf1.org/v1/championship_drivers'),
+          fetch('https://api.openf1.org/v1/drivers?session_key=latest')
+        ]);
+
+        const champData = await champRes.json();
+        const driversData = await driversRes.json();
+
+        const driversMap: Record<number, any> = {};
+        for (const driver of driversData) {
+          driversMap[driver.driver_number] = driver;
+        }
+
+        const latestByDriver: Record<number, any> = {};
+        for (const entry of champData) {
+          const num = entry.driver_number;
+          if (!latestByDriver[num] || entry.meeting_key > latestByDriver[num].meeting_key) {
+            latestByDriver[num] = entry;
+          }
+        }
+
+        const standings = Object.values(latestByDriver)
+          .sort((a, b) => (a.position_current ?? 99) - (b.position_current ?? 99));
+
+        if (standings.length === 0) {
+          container.innerHTML = `
+            <div class="champ-empty">
+              <p>La temporada 2026 aún no ha comenzado.<br>Los datos estarán disponibles después de la primera carrera.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const rows = standings.map((entry: any) => {
+          const driver = driversMap[entry.driver_number] || {};
+          const pos = entry.position_current ?? '–';
+          const posClass = pos === 1 ? 'champ-pos-1' : pos === 2 ? 'champ-pos-2' : pos === 3 ? 'champ-pos-3' : '';
+          const teamColor = driver.team_colour ? `#${driver.team_colour}` : null;
+          const colorVar = teamColor ? `--team-color: ${teamColor};` : '';
+          const headshot = driver.headshot_url || '';
+          const acronym = driver.name_acronym || `#${entry.driver_number}`;
+          const name = driver.full_name || '';
+          const team = driver.team_name || '';
+          const points = entry.points_current ?? 0;
+
+          const photoHtml = headshot
+            ? `<img class="champ-photo" src="${headshot}" alt="${name}" loading="lazy" />`
+            : `<div class="champ-photo-placeholder"></div>`;
+
+          return `
+            <div class="champ-row" style="${colorVar}">
+              <div class="champ-pos ${posClass}">${pos}</div>
+              ${photoHtml}
+              <div class="champ-info">
+                <span class="champ-code">${acronym}</span>
+                <span class="champ-name">${name}</span>
+                <span class="champ-team">
+                  <span class="champ-team-dot"></span>
+                  ${team}
+                </span>
+              </div>
+              <div class="champ-pts">
+                <span class="champ-pts-value">${points}</span>
+                <span class="champ-pts-label">pts</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = `<div class="champ-list">${rows}</div>`;
+      } catch (err) {
+        container.innerHTML = `
+          <div class="champ-error">
+            <p>Error al cargar los datos.<br>Intentá de nuevo más tarde.</p>
+          </div>
+        `;
+      }
+    }
+
+    loadStandings();
+  </script>
+</Layout>

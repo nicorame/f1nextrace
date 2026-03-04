@@ -98,6 +98,12 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </a>
+            <a href="./campeonato" class="cta-button cta-button-secondary">
+              Ver campeonato
+              <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -381,9 +387,26 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       box-shadow: 0 10px 30px rgba(225, 6, 0, 0.4);
     }
 
+    .cta-button-secondary {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+      box-shadow: none;
+    }
+
+    .cta-button-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: none;
+    }
+
     .cta-container {
       text-align: center;
       margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .button-icon {
@@ -457,7 +480,7 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       const countdownEl = document.getElementById('countdown');
       if (!countdownEl) return;
 
-      const targetDate = new Date(countdownEl.dataset.targetDate);
+      const targetDate = new Date(countdownEl.dataset.targetDate!);
       const now = new Date();
       const diff = targetDate.getTime() - now.getTime();
 
