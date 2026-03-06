@@ -5,9 +5,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "remotion:preview": "remotion preview src/remotion/index.ts",
+    "remotion:render": "remotion render src/remotion/index.ts F1Intro out/F1Intro.mp4"
   },
   "dependencies": {
-    "astro": "^4.0.0"
+    "@astrojs/react": "^4.4.2",
+    "@remotion/player": "^4.0.434",
+    "astro": "^4.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "remotion": "^4.0.434"
   }
 }
