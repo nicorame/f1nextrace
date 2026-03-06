@@ -184,16 +184,16 @@ export const raceCalendar: RaceSession[] = [
 export function parseDate(dateStr: string, timeStr: string): Date {
   const [day, month, year] = dateStr.split('/').map(Number);
   const [hours, minutes] = timeStr.split(':').map(Number);
-  return new Date(year, month - 1, day, hours, minutes);
+  // Argentina is UTC-3 year-round (no DST), so add 3 hours to get UTC
+  return new Date(Date.UTC(year, month - 1, day, hours + 3, minutes));
 }
 
 export function getNextRace(): RaceSession | null {
   const now = new Date();
-  const argNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-  
+
   for (const session of raceCalendar) {
     const sessionDate = parseDate(session.fecha, session.hora);
-    if (sessionDate > argNow && session.sesion === "Carrera") {
+    if (sessionDate > now && session.sesion === "Carrera") {
       return session;
     }
   }
@@ -202,11 +202,10 @@ export function getNextRace(): RaceSession | null {
 
 export function getNextSession(): RaceSession | null {
   const now = new Date();
-  const argNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-  
+
   for (const session of raceCalendar) {
     const sessionDate = parseDate(session.fecha, session.hora);
-    if (sessionDate > argNow) {
+    if (sessionDate > now) {
       return session;
     }
   }
