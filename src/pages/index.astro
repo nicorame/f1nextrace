@@ -485,7 +485,6 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       const diff = targetDate.getTime() - now.getTime();
 
       if (diff <= 0) {
-        location.reload();
         return;
       }
 
