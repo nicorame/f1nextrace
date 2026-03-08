@@ -1,13 +1,11 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import { getNextSession, getWeekendSessions, parseDate } from '../utils/raceData';
-
-const nextSession = getNextSession();
-const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
+import { raceCalendar } from '../utils/raceData';
+const calendarJson = JSON.stringify(raceCalendar);
 ---
 
-<Layout 
+<Layout
   title="F1 Horarios - Próxima Carrera y Calendario Completo 2026"
   description="Cuenta regresiva para la próxima sesión de Fórmula 1. Horarios actualizados de todas las carreras, entrenamientos y clasificaciones del campeonato 2026."
 >
@@ -19,95 +17,87 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
           <span class="logo-text">Next Race</span>
         </h1>
         <p class="subtitle">Campeonato 2026</p>
+        <a href="./campeonato" class="cta-button standings-link">
+          ver posiciones 2026
+          <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
       </header>
 
-      {nextSession ? (
-        <div class="countdown-section">
-          <p class="next-race-label">próxima carrera</p>
-          
-          <h2 class="race-location">{nextSession.gp}</h2>
+      <div id="countdownSection" class="countdown-section" style="display:none">
+        <p class="next-race-label">próxima carrera</p>
 
-          <div id="countdown" class="countdown" data-target-date={parseDate(nextSession.fecha, nextSession.hora).toISOString()}>
-            <div class="countdown-item">
-              <span class="countdown-value" id="days">00</span>
-              <span class="countdown-label">días</span>
-            </div>
-            <div class="countdown-separator">:</div>
-            <div class="countdown-item">
-              <span class="countdown-value" id="hours">00</span>
-              <span class="countdown-label">horas</span>
-            </div>
-            <div class="countdown-separator">:</div>
-            <div class="countdown-item">
-              <span class="countdown-value" id="minutes">00</span>
-              <span class="countdown-label">minutos</span>
-            </div>
-            <div class="countdown-separator">:</div>
-            <div class="countdown-item">
-              <span class="countdown-value" id="seconds">00</span>
-              <span class="countdown-label">segundos</span>
-            </div>
+        <h2 class="race-location" id="raceLocation"></h2>
+
+        <div id="countdown" class="countdown">
+          <div class="countdown-item">
+            <span class="countdown-value" id="days">00</span>
+            <span class="countdown-label">días</span>
           </div>
-
-          <div class="session-info-main">
-            <div class="session-badge">{nextSession.sesion}</div>
-            <div class="session-time">
-              <span>{nextSession.hora} hs</span>
-            </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <span class="countdown-value" id="hours">00</span>
+            <span class="countdown-label">horas</span>
           </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <span class="countdown-value" id="minutes">00</span>
+            <span class="countdown-label">minutos</span>
+          </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <span class="countdown-value" id="seconds">00</span>
+            <span class="countdown-label">segundos</span>
+          </div>
+        </div>
 
-          <button id="toggleSchedule" class="show-schedule-btn">
-            ver todos los horarios
-            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </button>
+        <div class="session-info-main">
+          <div class="session-badge" id="sessionBadge"></div>
+          <div class="session-time">
+            <span id="sessionTime"></span>
+          </div>
         </div>
-      ) : (
-        <div class="no-race">
-          <p>No hay carreras programadas próximamente</p>
-        </div>
-      )}
+
+        <button id="toggleSchedule" class="show-schedule-btn">
+          ver todos los horarios
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="noRace" class="no-race" style="display:none">
+        <p>No hay carreras programadas próximamente</p>
+      </div>
     </div>
 
-    {nextSession && (
-      <div id="scheduleSection" class="schedule-section">
-        <div class="container">
-          <div class="schedule-header">
-            <h3 class="schedule-title">Horarios del fin de semana</h3>
-          </div>
+    <div id="scheduleSection" class="schedule-section" style="display:none">
+      <div class="container">
+        <div class="schedule-header">
+          <h3 class="schedule-title">Horarios del fin de semana</h3>
+        </div>
 
-          <div class="weekend-schedule">
-            <div class="schedule-grid">
-              {weekendSessions.map(session => (
-                <div class="schedule-item">
-                  <div class="schedule-session">{session.sesion}</div>
-                  <div class="schedule-details">
-                    <span class="schedule-date">{session.fecha.substring(0, 5)}</span>
-                    <span class="schedule-time">{session.hora} hs</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div class="weekend-schedule">
+          <div class="schedule-grid" id="scheduleGrid"></div>
+        </div>
 
-          <div class="cta-container">
-            <a href="./calendario" class="cta-button">
-              Ver calendario completo
-              <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
-            <a href="./campeonato" class="cta-button cta-button-secondary">
-              Ver campeonato
-              <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </a>
-          </div>
+        <div class="cta-container">
+          <a href="./calendario" class="cta-button">
+            Ver calendario completo
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+          <a href="./campeonato" class="cta-button cta-button-secondary">
+            Ver campeonato
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
         </div>
       </div>
-    )}
+    </div>
   </main>
 
   <style>
@@ -126,7 +116,7 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
 
     .header {
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 2rem;
     }
 
     .logo {
@@ -156,9 +146,10 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       color: var(--text-secondary);
       font-size: 1rem;
       font-weight: 500;
+      margin-bottom: 1rem;
     }
 
-    .countdown-section {
+.countdown-section {
       text-align: center;
       max-width: 800px;
       width: 100%;
@@ -335,37 +326,115 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       margin: 0 auto;
     }
 
-    .schedule-item {
+    :global(.schedule-item) {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 1rem;
       padding: 1rem;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.75rem;
       transition: all 0.3s ease;
     }
 
-    .schedule-item:hover {
+    :global(.schedule-item:not(.schedule-item-past):hover) {
       border-color: var(--accent);
       transform: translateY(-2px);
     }
 
-    .schedule-session {
+    :global(.schedule-item-header) {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    :global(.schedule-item-past) {
+      cursor: pointer;
+      border-color: var(--border);
+    }
+
+    :global(.schedule-item-past:hover) {
+      border-color: var(--text-secondary);
+    }
+
+    :global(.schedule-item-past.schedule-item-open) {
+      border-color: var(--accent);
+    }
+
+    :global(.schedule-session) {
       font-weight: 600;
       color: var(--text-primary);
     }
 
-    .schedule-details {
+    :global(.schedule-details) {
       display: flex;
       gap: 0.75rem;
       color: var(--text-secondary);
       font-size: 0.875rem;
     }
 
-    .schedule-time {
+    :global(.schedule-time) {
       font-weight: 600;
       color: var(--accent);
+    }
+
+    :global(.schedule-results-hint) {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.6;
+    }
+
+    :global(.schedule-results-panel) {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.625rem;
+    }
+
+    :global(.schedule-results-loading) {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 0.25rem 0;
+    }
+
+    :global(.schedule-result-row) {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    :global(.schedule-result-pos) {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      width: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    :global(.schedule-result-bar) {
+      width: 3px;
+      height: 1rem;
+      border-radius: 2px;
+      background-color: var(--res-color, var(--border));
+      flex-shrink: 0;
+    }
+
+    :global(.schedule-result-name) {
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    :global(.schedule-result-time) {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.03em;
     }
 
     .cta-button {
@@ -475,16 +544,207 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
     }
   </style>
 
-  <script>
-    function updateCountdown() {
-      const countdownEl = document.getElementById('countdown');
-      if (!countdownEl) return;
+  <script define:vars={{ calendarJson }}>
+    const calendar = JSON.parse(calendarJson);
 
-      const targetDate = new Date(countdownEl.dataset.targetDate!);
+    function parseDate(dateStr, timeStr) {
+      const [day, month, year] = dateStr.split('/').map(Number);
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      // Argentina is UTC-3 year-round (no DST), so add 3 hours to get UTC
+      return new Date(Date.UTC(year, month - 1, day, hours + 3, minutes));
+    }
+
+    function getNextSession() {
+      const now = new Date();
+      for (const session of calendar) {
+        if (parseDate(session.fecha, session.hora) > now) {
+          return session;
+        }
+      }
+      return null;
+    }
+
+    function getWeekendSessions(gp) {
+      return calendar.filter(s => s.gp === gp);
+    }
+
+    let targetDate = null;
+    let intervalId = null;
+
+    // --- Top 5 fetch helpers ---
+    let openF1SessionsCache = null;
+    const top5Cache = {};
+
+    async function getOpenF1Sessions() {
+      if (openF1SessionsCache) return openF1SessionsCache;
+      const res = await fetch('https://api.openf1.org/v1/sessions?year=2026');
+      openF1SessionsCache = await res.json();
+      return openF1SessionsCache;
+    }
+
+    function formatLapTime(seconds) {
+      if (!seconds) return '--';
+      const mins = Math.floor(seconds / 60);
+      const secs = (seconds % 60).toFixed(3);
+      return mins > 0 ? `${mins}:${secs.padStart(6, '0')}` : `${secs}s`;
+    }
+
+    async function fetchTop5(calSession) {
+      const cacheKey = `${calSession.fecha}_${calSession.sesion}`;
+      if (top5Cache[cacheKey]) return top5Cache[cacheKey];
+
+      const allSessions = await getOpenF1Sessions();
+      const targetTime = parseDate(calSession.fecha, calSession.hora).getTime();
+
+      // Match OpenF1 session by date proximity (within 2 hours)
+      const match = allSessions.find(s => {
+        const diff = Math.abs(new Date(s.date_start).getTime() - targetTime);
+        return diff < 2 * 60 * 60 * 1000;
+      });
+
+      if (!match) return null;
+
+      const sessionKey = match.session_key;
+      const isRace = ['Race', 'Sprint'].includes(match.session_name);
+
+      const [mainRes, drvRes] = await Promise.all([
+        fetch(isRace
+          ? `https://api.openf1.org/v1/position?session_key=${sessionKey}`
+          : `https://api.openf1.org/v1/laps?session_key=${sessionKey}`),
+        fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`)
+      ]);
+      const mainData = await mainRes.json();
+      const drvData = await drvRes.json();
+
+      const drvMap = {};
+      for (const d of drvData) drvMap[d.driver_number] = d;
+
+      let top5;
+      if (isRace) {
+        const finalPos = {};
+        for (const p of mainData) finalPos[p.driver_number] = p.position;
+        top5 = Object.entries(finalPos)
+          .map(([num, pos]) => ({ pos, driver: drvMap[Number(num)] || {} }))
+          .sort((a, b) => a.pos - b.pos)
+          .slice(0, 5)
+          .map(({ pos, driver }) => ({
+            pos,
+            name: driver.full_name || `#${driver.driver_number}`,
+            teamColor: driver.team_colour ? `#${driver.team_colour}` : null,
+            time: null
+          }));
+      } else {
+        const fastest = {};
+        for (const lap of mainData) {
+          if (!lap.lap_duration) continue;
+          const n = lap.driver_number;
+          if (!fastest[n] || lap.lap_duration < fastest[n]) fastest[n] = lap.lap_duration;
+        }
+        top5 = Object.entries(fastest)
+          .map(([num, time]) => ({ num: Number(num), time, driver: drvMap[Number(num)] || {} }))
+          .sort((a, b) => a.time - b.time)
+          .slice(0, 5)
+          .map(({ num, time, driver }, i) => ({
+            pos: i + 1,
+            name: driver.full_name || `#${num}`,
+            teamColor: driver.team_colour ? `#${driver.team_colour}` : null,
+            time: formatLapTime(time)
+          }));
+      }
+
+      const result = { top5, isRace };
+      top5Cache[cacheKey] = result;
+      return result;
+    }
+    // --- end helpers ---
+
+    function renderSession(session) {
+      targetDate = parseDate(session.fecha, session.hora);
+
+      document.getElementById('raceLocation').textContent = session.gp;
+      document.getElementById('sessionBadge').textContent = session.sesion;
+      document.getElementById('sessionTime').textContent = session.hora + ' hs';
+      document.getElementById('countdownSection').style.display = '';
+
+      const grid = document.getElementById('scheduleGrid');
+      const weekendSessions = getWeekendSessions(session.gp);
+      const now = new Date();
+
+      grid.innerHTML = weekendSessions.map(s => {
+        const isPast = parseDate(s.fecha, s.hora) < now;
+        return `
+          <div class="schedule-item ${isPast ? 'schedule-item-past' : ''}"
+               data-fecha="${s.fecha}" data-hora="${s.hora}" data-sesion="${s.sesion}">
+            <div class="schedule-item-header">
+              <div class="schedule-session">${s.sesion}</div>
+              <div class="schedule-details">
+                <span class="schedule-date">${s.fecha.substring(0, 5)}</span>
+                <span class="schedule-time">${s.hora} hs</span>
+              </div>
+            </div>
+            ${isPast ? '<span class="schedule-results-hint">ver top 5</span>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Click handlers for past sessions
+      grid.querySelectorAll('.schedule-item-past').forEach(item => {
+        item.addEventListener('click', async () => {
+          const isOpen = item.classList.contains('schedule-item-open');
+          const existingPanel = item.querySelector('.schedule-results-panel');
+
+          if (isOpen && existingPanel) {
+            existingPanel.remove();
+            item.classList.remove('schedule-item-open');
+            return;
+          }
+
+          item.classList.add('schedule-item-open');
+          const panel = document.createElement('div');
+          panel.className = 'schedule-results-panel';
+          panel.innerHTML = '<div class="schedule-results-loading">Cargando...</div>';
+          item.appendChild(panel);
+
+          const calSession = { fecha: item.dataset.fecha, hora: item.dataset.hora, sesion: item.dataset.sesion };
+          const result = await fetchTop5(calSession);
+
+          if (!result || !result.top5.length) {
+            panel.innerHTML = '<div class="schedule-results-loading">Sin datos disponibles</div>';
+            return;
+          }
+
+          panel.innerHTML = result.top5.map(r => `
+            <div class="schedule-result-row">
+              <span class="schedule-result-pos">P${r.pos}</span>
+              <span class="schedule-result-bar" style="--res-color:${r.teamColor || 'var(--border)'}"></span>
+              <span class="schedule-result-name">${r.name}</span>
+              ${r.time ? `<span class="schedule-result-time">${r.time}</span>` : ''}
+            </div>
+          `).join('');
+        });
+      });
+
+      document.getElementById('scheduleSection').style.display = '';
+    }
+
+    function updateCountdown() {
+      if (!targetDate) return;
+
       const now = new Date();
       const diff = targetDate.getTime() - now.getTime();
 
       if (diff <= 0) {
+        // Session passed — find the new next session
+        clearInterval(intervalId);
+        const next = getNextSession();
+        if (next) {
+          renderSession(next);
+          intervalId = setInterval(updateCountdown, 1000);
+        } else {
+          document.getElementById('countdownSection').style.display = 'none';
+          document.getElementById('scheduleSection').style.display = 'none';
+          document.getElementById('noRace').style.display = '';
+        }
         return;
       }
 
@@ -493,24 +753,25 @@ const weekendSessions = nextSession ? getWeekendSessions(nextSession.gp) : [];
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      const daysEl = document.getElementById('days');
-      const hoursEl = document.getElementById('hours');
-      const minutesEl = document.getElementById('minutes');
-      const secondsEl = document.getElementById('seconds');
-
-      if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
-      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
-      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
-      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+      document.getElementById('days').textContent = String(days).padStart(2, '0');
+      document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
     }
 
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    const nextSession = getNextSession();
+    if (nextSession) {
+      renderSession(nextSession);
+      updateCountdown();
+      intervalId = setInterval(updateCountdown, 1000);
+    } else {
+      document.getElementById('noRace').style.display = '';
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
       const toggleBtn = document.getElementById('toggleSchedule');
       const scheduleSection = document.getElementById('scheduleSection');
-      
+
       if (toggleBtn && scheduleSection) {
         toggleBtn.addEventListener('click', function() {
           toggleBtn.classList.toggle('active');

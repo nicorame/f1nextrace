@@ -31,8 +31,8 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <footer class="champ-footer">
-        <p>Datos provistos por <a href="https://openf1.org" target="_blank" rel="noopener">OpenF1</a></p>
-        <p class="champ-footer-note">Actualizado después de cada carrera</p>
+        <p>Los datos se actualizan despues de cada carrera</a></p>
+
       </footer>
     </div>
   </main>
@@ -298,6 +298,102 @@ import Layout from '../layouts/Layout.astro';
       opacity: 0.6;
     }
 
+    .champ-row {
+      cursor: pointer;
+    }
+
+    .champ-chevron {
+      width: 1.1rem;
+      height: 1.1rem;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+      transition: transform 0.25s ease;
+    }
+
+    .champ-row-open .champ-chevron {
+      transform: rotate(180deg);
+    }
+
+    .champ-row-open {
+      border-color: var(--team-color, var(--accent));
+    }
+
+    /* Race results panel */
+    .champ-results-panel {
+      background: var(--bg-secondary, #111);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 1rem 1rem;
+      padding: 0.75rem 1.25rem;
+      margin-top: -0.5rem;
+      margin-bottom: 0.25rem;
+      animation: champ-panel-in 0.2s ease;
+    }
+
+    @keyframes champ-panel-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .champ-results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .champ-results-loading {
+      display: flex;
+      justify-content: center;
+      padding: 1rem 0;
+    }
+
+    .champ-result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    .champ-result-race {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .champ-result-data {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .champ-result-pos {
+      font-size: 1rem;
+      font-weight: 900;
+      font-family: 'Bebas Neue', sans-serif;
+      color: var(--text-primary);
+      letter-spacing: 0.05em;
+    }
+
+    .champ-result-pts {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .champ-result-pts-positive {
+      color: var(--accent);
+    }
+
+    .champ-results-empty {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .champ-title {
@@ -323,7 +419,8 @@ import Layout from '../layouts/Layout.astro';
 
       .champ-photo,
       .champ-photo-placeholder {
-        display: none;
+        width: 2rem;
+        height: 2rem;
       }
 
       .champ-code {
@@ -338,12 +435,27 @@ import Layout from '../layouts/Layout.astro';
       if (!container) return;
 
       try {
-        const [champRes, driversRes] = await Promise.all([
+        const [champRes, sessionsRes] = await Promise.all([
           fetch('https://api.openf1.org/v1/championship_drivers'),
-          fetch('https://api.openf1.org/v1/drivers?session_key=latest')
+          fetch('https://api.openf1.org/v1/sessions?session_type=Race&year=2026')
         ]);
 
         const champData = await champRes.json();
+        const sessions = await sessionsRes.json();
+
+        // Map meeting_key → country name for race results panel (2026 only)
+        const meetingNames: Record<number, string> = {};
+        const validMeetingKeys = new Set<number>();
+        for (const s of sessions) {
+          meetingNames[s.meeting_key] = s.country_name || s.circuit_short_name || `Meeting ${s.meeting_key}`;
+          validMeetingKeys.add(s.meeting_key);
+        }
+
+        // Use latest race session so all 22 drivers are included
+        const latestRace = sessions.sort((a: any, b: any) => b.session_key - a.session_key)[0];
+        const sessionKey = latestRace?.session_key ?? 'latest';
+
+        const driversRes = await fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`);
         const driversData = await driversRes.json();
 
         const driversMap: Record<number, any> = {};
@@ -351,16 +463,31 @@ import Layout from '../layouts/Layout.astro';
           driversMap[driver.driver_number] = driver;
         }
 
-        const latestByDriver: Record<number, any> = {};
-        for (const entry of champData) {
+        // Filter champData to 2026 only, then build per-driver history
+        const champData2026 = champData.filter((e: any) => validMeetingKeys.has(e.meeting_key));
+
+        const driverHistory: Record<number, any[]> = {};
+        for (const entry of champData2026) {
           const num = entry.driver_number;
-          if (!latestByDriver[num] || entry.meeting_key > latestByDriver[num].meeting_key) {
-            latestByDriver[num] = entry;
-          }
+          if (!driverHistory[num]) driverHistory[num] = [];
+          driverHistory[num].push(entry);
+        }
+        for (const num in driverHistory) {
+          driverHistory[num].sort((a: any, b: any) => a.meeting_key - b.meeting_key);
+        }
+
+        const latestByDriver: Record<number, any> = {};
+        for (const num in driverHistory) {
+          const history = driverHistory[num];
+          latestByDriver[Number(num)] = history[history.length - 1]; // most recent 2026 entry
         }
 
         const standings = Object.values(latestByDriver)
-          .sort((a, b) => (a.position_current ?? 99) - (b.position_current ?? 99));
+          .filter((entry: any) => {
+            const driver = driversMap[entry.driver_number] || {};
+            return driver.full_name && driver.team_name;
+          })
+          .sort((a: any, b: any) => (b.points_current ?? 0) - (a.points_current ?? 0));
 
         if (standings.length === 0) {
           container.innerHTML = `
@@ -371,9 +498,9 @@ import Layout from '../layouts/Layout.astro';
           return;
         }
 
-        const rows = standings.map((entry: any) => {
+        const rows = standings.map((entry: any, index: number) => {
           const driver = driversMap[entry.driver_number] || {};
-          const pos = entry.position_current ?? '–';
+          const pos = index + 1;
           const posClass = pos === 1 ? 'champ-pos-1' : pos === 2 ? 'champ-pos-2' : pos === 3 ? 'champ-pos-3' : '';
           const teamColor = driver.team_colour ? `#${driver.team_colour}` : null;
           const colorVar = teamColor ? `--team-color: ${teamColor};` : '';
@@ -388,7 +515,7 @@ import Layout from '../layouts/Layout.astro';
             : `<div class="champ-photo-placeholder"></div>`;
 
           return `
-            <div class="champ-row" style="${colorVar}">
+            <div class="champ-row" style="${colorVar}" data-driver="${entry.driver_number}">
               <div class="champ-pos ${posClass}">${pos}</div>
               ${photoHtml}
               <div class="champ-info">
@@ -403,11 +530,93 @@ import Layout from '../layouts/Layout.astro';
                 <span class="champ-pts-value">${points}</span>
                 <span class="champ-pts-label">pts</span>
               </div>
+              <svg class="champ-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </div>
           `;
         }).join('');
 
         container.innerHTML = `<div class="champ-list">${rows}</div>`;
+
+        // Cache: driverNum → Map(meeting_key → finishing position)
+        const positionCache = new Map<number, Map<number, number>>();
+
+        const completedRaces = sessions.filter((s: any) => new Date(s.date_end) < new Date());
+
+        async function fetchPositions(driverNum: number): Promise<Map<number, number>> {
+          if (positionCache.has(driverNum)) return positionCache.get(driverNum)!;
+
+          const byMeeting = new Map<number, number>();
+          await Promise.all(completedRaces.map(async (session: any) => {
+            try {
+              const res = await fetch(
+                `https://api.openf1.org/v1/position?session_key=${session.session_key}&driver_number=${driverNum}`
+              );
+              const data = await res.json();
+              if (data.length > 0) {
+                byMeeting.set(session.meeting_key, data[data.length - 1].position);
+              }
+            } catch {}
+          }));
+
+          positionCache.set(driverNum, byMeeting);
+          return byMeeting;
+        }
+
+        function buildPanel(panel: HTMLElement, driverNum: number, posMap: Map<number, number>) {
+          const history = driverHistory[driverNum] || [];
+          const byMeeting: Record<number, any> = {};
+          for (const entry of history) {
+            byMeeting[entry.meeting_key] = entry;
+          }
+          const meetingEntries = Object.values(byMeeting).sort((a: any, b: any) => a.meeting_key - b.meeting_key);
+
+          const raceItems = meetingEntries.map((entry: any, i: number) => {
+            const prevPts = i > 0 ? (meetingEntries[i - 1].points_current ?? 0) : 0;
+            const earned = (entry.points_current ?? 0) - prevPts;
+            const raceName = meetingNames[entry.meeting_key] || `Race ${i + 1}`;
+            const finishPos = posMap.get(entry.meeting_key);
+            const posText = finishPos ? `P${finishPos}` : '–';
+            return `
+              <div class="champ-result-item">
+                <span class="champ-result-race">${raceName}</span>
+                <div class="champ-result-data">
+                  <span class="champ-result-pos">${posText}</span>
+                  <span class="champ-result-pts ${earned > 0 ? 'champ-result-pts-positive' : ''}">${earned > 0 ? '+' : ''}${earned} pts</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          panel.innerHTML = meetingEntries.length
+            ? `<div class="champ-results-grid">${raceItems}</div>`
+            : `<p class="champ-results-empty">Sin carreras disputadas aún.</p>`;
+        }
+
+        // Click handlers for race results
+        container.querySelectorAll('.champ-row').forEach(row => {
+          row.addEventListener('click', async () => {
+            const driverNum = Number((row as HTMLElement).dataset.driver);
+            const isOpen = row.classList.contains('champ-row-open');
+
+            container.querySelectorAll('.champ-row-open').forEach(r => r.classList.remove('champ-row-open'));
+            container.querySelectorAll('.champ-results-panel').forEach(p => p.remove());
+
+            if (isOpen) return;
+
+            row.classList.add('champ-row-open');
+
+            const panel = document.createElement('div');
+            panel.className = 'champ-results-panel';
+            panel.innerHTML = `<div class="champ-results-loading"><div class="champ-spinner"></div></div>`;
+            row.insertAdjacentElement('afterend', panel);
+
+            const posMap = await fetchPositions(driverNum);
+            buildPanel(panel, driverNum, posMap);
+          });
+        });
+
       } catch (err) {
         container.innerHTML = `
           <div class="champ-error">
